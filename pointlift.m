@@ -123,10 +123,8 @@ function ReducedIsomsConjugates(f,n,k)
         isoms:=tup[2];
         mats:=[];
         for isom in isoms do
-            matTups:=isom[3];
-            for matTup in matTups do
-                mats:=Append(mats, matTup[2]);
-            end for;
+            matTup:=isom[3];
+            mats:=Append(mats, matTup[2]);
         end for;
         completeSigmaMatList:=Append(completeSigmaMatList, <sigma, mats>);
     end for;

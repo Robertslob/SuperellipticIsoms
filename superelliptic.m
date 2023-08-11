@@ -125,9 +125,7 @@ function ReducedSuperEllipticIsom(f, F, degf, degF, n : geometric := true, commo
 					end if;
 					P1<x>:=PolynomialRing(L1);
 					lambdaA:=P1!lambda;
-					if c ne 0 then
-						lambdaA*:= (c*x+d)^powerForLambda;
-					end if;
+					lambdaA*:= (c*x+d)^powerForLambda;
 					list:=Append(list, <i, lambdaA, <mu,A>>);
 				end for;
 				if L ne K and commonField then		
@@ -147,14 +145,11 @@ function ReducedSuperEllipticIsom(f, F, degf, degF, n : geometric := true, commo
 		for tup in list do
 			i:=tup[1];
 			lambda:=Parent(F)!tup[2];
-			mumattups:=tup[3];
-			newtups:=[];
-			for tup2 in mumattups do
-				mu:=L!tup2[1];
-				mat:=ChangeRing(tup2[2], K);
-				newtups:=Append(newtups, <mu, mat>);
-			end for;
-			finalList:=Append(finalList, <i, lambda, newtups>);
+			mumattup:=tup[3];
+			mu:=K!mumattup[1];
+			mat:=ChangeRing(mumattup[2],K);
+			newtup:=<mu,mat>;
+			finalList:=Append(finalList, <i, lambda, newtup>);
 		end for;
 		return # finalList gt 0, finalList;	
 	end if;
@@ -223,7 +218,7 @@ function SuperEllipticFieldOfModuli(f, n, k: geometric:=true, extended:= false)
 		b, isoms:=NormalizedReducedSuperEllipticIsom(fConj, f, n: geometric:=geometric, commonField:=true);
 		if b then 
 			successfullAuts:=Append(successfullAuts, map);
-			F:=Parent(isoms[1][3][1][2][1][1]);
+			F:=Parent(isoms[1][3][2][1][1]);
 			if F ne Parent(LeadingCoefficient(f)) then		
 				f:=PolynomialRing(F)!f; //THIS MUST STILL BE BUGGY; if we change the ring, then we should do the whole function again.
 			end if;
@@ -231,7 +226,7 @@ function SuperEllipticFieldOfModuli(f, n, k: geometric:=true, extended:= false)
 				L:=Append(L, <map, isoms>);
 			else 
 				tup:= isoms[1];
-				newTup:= <tup[1],tup[2], tup[3][1]>;
+				newTup:= <tup[1],tup[2], tup[3]>;
 				L:=Append(L, <map, newTup>);
 			end if;
 		end if;
@@ -245,15 +240,13 @@ end function;
 // Method: We calculcate the Automorphism group of X using NormalizedReducedSuperEllipticAutomorphismGroup(), then we use ComputeQuotientMorphismP1() to calculate the quotient morphism.
 // Potential problem: not sure whether our algo will always output the quotient morphism over K. 
 function QuotientByReducedAutGroup(f,n)
-	b, L:=NormalizedReducedSuperEllipticAutomorphismGroup(f,n: commonField:=true);
+	b, auts:=NormalizedReducedSuperEllipticAutomorphismGroup(f,n: commonField:=true);
 	mats := [**];
 	
-	K:=Parent(L[1][3][1][2][1][1]);
-	for autTup in L do
+	K:=Parent(auts[1][3][2][1][1]);
+	for autTup in auts do
 		matTuple:= autTup[3];
-		for tup in matTuple do
-			mats:= Append(mats, tup[2]);
-		end for;
+		mats:= Append(mats, matTuple[2]);
 	end for;
 	quotMorph := ComputeQuotientMorphismP1(mats); 
 	// The quotient morphism can sometimes be defined over the ground field. Will our algo always output this as well?
